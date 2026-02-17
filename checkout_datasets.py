@@ -41,3 +41,11 @@ haltestellen_osmnx_df = pd.read_csv("Haltestellen/Quelle_Openstreetmap/oepnv_02_
 print(f"Num Haltestellen in OSM Dataset (osmnx): {len(haltestellen_osmnx_df)}")
 print(f"Num von Eintraegen mit Namen: {haltestellen_osmnx_df["name"].notna().sum()}")
 print(haltestellen_osmnx_df.head())
+
+
+print("\n\nGetränkeläden:")
+print("\n\nQuelle OSMNX:")
+stores_osmnx_df = pd.read_csv("Getraenke_Laeden/stores_02_osmnx_result.csv")
+print(f"Num Stores in OSM Dataset (osmnx): {len(stores_osmnx_df)}")
+print(f"Num von Eintraegen mit Namen: {stores_osmnx_df["name"].notna().sum()}")
+print(stores_osmnx_df.head())
