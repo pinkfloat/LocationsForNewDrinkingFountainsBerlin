@@ -1,0 +1,41 @@
+import geopandas as gpd
+
+# -----------------------------
+# Choose row number to compare entries
+# -----------------------------
+row = 12
+
+# -----------------------------
+# Load data
+# -----------------------------
+usage_df = gpd.read_file("ua_flaechennutzung_c_reale_nutzung_2022_WGS84.geojson")
+population_df = gpd.read_file("ua_einwohnerdichte_2023_einwohnerdichte2023_WGS84.geojson")
+
+# Check if index exists
+if row >= len(usage_df):
+    raise IndexError(f"Row {row} doesn't exist. DataFrame only has {len(usage_df)} rows.")
+
+# -----------------------------
+# Print row of usage_df
+# -----------------------------
+usage_row = usage_df.iloc[row]
+
+print("\n--- usage_df row ---")
+print(usage_row)
+
+# -----------------------------
+# Take key of this row
+# -----------------------------
+schluessel = usage_row["schluessel"]
+print(f"\nkey: {schluessel}")
+
+# -----------------------------
+# Print corresponding row of population_df
+# -----------------------------
+matching_population_row = population_df[population_df["schluessel"] == schluessel]
+
+if matching_population_row.empty:
+    print("\nKey doesn't exist in population_df.")
+else:
+    print("\n--- population_df corresponding row ---")
+    print(matching_population_row.iloc[0])
