@@ -1,12 +1,13 @@
 import pandas as pd
+import geopandas as gpd
 
 # Set display option to show all columns
 pd.set_option('display.max_columns', None)
 
 print("Trinkbrunnen (von Geoportal Berlin):")
-trinkbrunnen_df = pd.read_csv("Trinkbrunnen/trinkbrunnen_berlin.csv")
-print(f"Num Trinkbrunnen: {len(trinkbrunnen_df)}")
-print(trinkbrunnen_df.head())
+trinkbrunnen_gdf = gpd.read_file("Trinkbrunnen/trinkwasserbrunnen_trinkwasserbrunnen_WGS84.geojson")
+print(f"Num Trinkbrunnen: {len(trinkbrunnen_gdf)}")
+print(trinkbrunnen_gdf.head())
 
 
 print("\n\nGrünanlagen:")

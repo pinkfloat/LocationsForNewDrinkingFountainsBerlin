@@ -14,8 +14,8 @@
 
 ## Quellen:
 
-### Trinkbrunnen (WFS Datei):
-[Trinkbrunnen WFS Datei](https://daten.berlin.de/datensaetze/trinkbrunnen_bwb?)
+### Trinkbrunnen (unter HTML Ressource):
+[Trinkbrunnen GeoJSON Datei](https://daten.berlin.de/datensaetze/trinkwasserbrunnen-wfs-47dba2c3)
 
 ### Grünanlagen (WFS Datei):
 [Grünanlagen WFS Datei](https://daten.berlin.de/datensaetze/grunanlagenbestand-berlin-einschliesslich-der-offentlichen-spielplatze-wfs-737fd0a4)
