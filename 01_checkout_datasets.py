@@ -4,16 +4,16 @@ import geopandas as gpd
 # Set display option to show all columns
 pd.set_option('display.max_columns', None)
 
-print("Trinkbrunnen (von Geoportal Berlin):")
+print("Trinkbrunnen (Berlin Open Data / BWB):")
 trinkbrunnen_gdf = gpd.read_file("Trinkbrunnen/trinkwasserbrunnen_trinkwasserbrunnen_WGS84.geojson")
 print(f"Num Trinkbrunnen: {len(trinkbrunnen_gdf)}")
 print(trinkbrunnen_gdf.head())
 
 
 print("\n\nGrünanlagen:")
-print("\n\nQuelle Geo Portal Berlin:")
-gruenanlagen_geo_portal_df = pd.read_csv("Gruenanlagen/Quelle_Geoportal_Berlin/gruenanlagen_berlin.csv")
-print(f"Num Grünanlagen in Geo Portal Berlin: {len(gruenanlagen_geo_portal_df)}")
+print("\n\nQuelle Berlin Open Data:")
+gruenanlagen_geo_portal_df = pd.read_csv("Gruenanlagen/Quelle_Berlin_Open_Data/gruenanlagen_berlin.csv")
+print(f"Num Grünanlagen bei Berlin Open Data: {len(gruenanlagen_geo_portal_df)}")
 print(f"Num von Eintraegen mit Namen: {gruenanlagen_geo_portal_df["namenr"].notna().sum()}")
 print(gruenanlagen_geo_portal_df.head())
 
