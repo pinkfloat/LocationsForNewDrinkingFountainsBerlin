@@ -11,22 +11,22 @@ import os
 # data into geo dataframes
 # -------------------------------------------------
 pd.set_option('display.max_columns', None)
-green_spaces_df = pd.read_csv("Gruenanlagen/Quelle_Geoportal_Berlin/gruenanlagen_berlin.csv")
+
 stops_df = pd.read_csv("Haltestellen/Quelle_Openstreetmap/oepnv_02_osmnx_result.csv")
-stores_df = pd.read_csv("Getraenke_Laeden/stores_02_osmnx_result.csv")
-
 stops_df = stops_df[stops_df["name"].notna()].copy()
-stores_df = stores_df[stores_df["name"].notna()].copy()
-
-green_spaces_df["geometry"] = green_spaces_df["geometry"].apply(wkt.loads)
 stops_df["geometry"] = stops_df["geometry"].apply(wkt.loads)
+stops = gpd.GeoDataFrame(stops_df, geometry="geometry", crs="EPSG:4326")
+
+stores_df = pd.read_csv("Getraenke_Laeden/stores_02_osmnx_result.csv")
+stores_df = stores_df[stores_df["name"].notna()].copy()
 stores_df["geometry"] = stores_df["geometry"].apply(wkt.loads)
+stores = gpd.GeoDataFrame(stores_df, geometry="geometry", crs="EPSG:4326")
 
 fountains = gpd.read_file("Trinkbrunnen/trinkwasserbrunnen_trinkwasserbrunnen_WGS84.geojson")
-stops = gpd.GeoDataFrame(stops_df, geometry="geometry", crs="EPSG:4326")
-stores = gpd.GeoDataFrame(stores_df, geometry="geometry", crs="EPSG:4326")
-green_spaces = gpd.GeoDataFrame(green_spaces_df, geometry="geometry", crs="EPSG:25833")
-green_spaces = green_spaces.to_crs(epsg=4326)
+fountains = fountains.set_crs("EPSG:4326", allow_override=True)
+
+berlin_area = gpd.read_file("Flaechennutzung/berlin_area_merged.geojson")
+berlin_area = berlin_area.set_crs("EPSG:4326", allow_override=True)
 
 # -------------------------------------------------
 # Map center (Berlin)
@@ -39,7 +39,13 @@ m = folium.Map(location=[52.52, 13.405], zoom_start=12, tiles="CartoDB positron"
 fountains_fg = folium.FeatureGroup(name="Drinking Fountains")
 stops_fg = folium.FeatureGroup(name="Public Transport Stops")
 stores_fg = folium.FeatureGroup(name="Beverage Stores")
-green_fg = folium.FeatureGroup(name="Green Spaces")
+berlin_area_fg = folium.FeatureGroup(name="Berlin Areas")
+
+# Coarse areas, so the website doesn't get too slow
+berlin_area["geometry"] = berlin_area["geometry"].simplify(
+    tolerance=0.0001,
+    preserve_topology=True
+)
 
 # -------------------------------------------------
 # MarkerCluster for large datasets
@@ -51,13 +57,18 @@ stores_cluster = MarkerCluster().add_to(stores_fg)
 # Drinking fountains (blue markers)
 # -------------------------------------------------
 for _, row in fountains.iterrows():
+    fountain_id = row.get('id', 'N/A')
+    
+    if fountain_id != 'N/A':
+        fountain_id = fountain_id.replace("trinkwasserbrunnen.", "")
+
     folium.CircleMarker(
         location=[row.geometry.y, row.geometry.x],
         radius=4,
         color="blue",
         fill=True,
         fill_opacity=0.8,
-        popup=f"Drinking Fountain No: {row.get('trinkbrunnennummer', 'N/A')}"
+        popup=f"Drinking Fountain No: {fountain_id}"
     ).add_to(fountains_fg)
 
 # -------------------------------------------------
@@ -87,27 +98,74 @@ for _, row in stores.iterrows():
     ).add_to(stores_cluster)
 
 # -------------------------------------------------
-# Green spaces (polygon layer)
+# Berlin Areas (polygon layer)
 # -------------------------------------------------
+
+# Color mapping based on "nutz" columns
+nutz_colors = {
+    "10":  "#f4cccc",  # Residential use (light red / soft pink)
+    "21":  "#f6b26b",  # Mixed use (light orange)
+    "30":  "#e69138",  # Core urban area (medium orange)
+    "40":  "#999999",  # Commercial and industrial use, large-scale retail (medium gray)
+    "50":  "#c27ba0",  # Public services and special use (muted purple)
+    "60":  "#8e7cc3",  # Utilities and supply infrastructure (medium violet)
+    "70":  "#b6d7a8",  # Weekend housing / garden-like residential use (pale green)
+
+    "80":  "#bdbdbd",  # Traffic area (excluding roads) (light gray)
+    "90":  "#d9d9d9",  # Construction site (very light gray)
+
+    "100": "#006400",  # Forest (dark green)
+
+    "110": "#1f78ff",  # Water body (bright blue)
+
+    "121": "#98fb98",  # Grassland (pale green)
+    "122": "#b7e1a1",  # Arable land (soft yellow-green)
+
+    "130": "#a8e6a3",  # Park / Green space (light fresh green)
+    "140": "#d0e0e3",  # City square / promenade (light bluish gray)
+
+    "150": "#c5e8b7",  # Cemetery (muted light green)
+    "160": "#b4f0b4",  # Allotment garden (bright light green)
+
+    "171": "#e2f0d9",  # Brownfield, vegetation-free (very pale green)
+    "172": "#cfe8cf",  # Brownfield with meadow-like vegetation (soft desaturated green)
+    "173": "#b7d7b7",  # Brownfield with mixed vegetation (medium desaturated green)
+
+    "190": "#6fa8dc",  # Sports area (soft blue)
+
+    "200": "#93c47d",  # Tree nursery / horticulture (natural medium green)
+}
+default_color = "#dddddd"  # Default fallback color (neutral light gray)
+
+def style_function(feature):
+    nutz_value = str(feature["properties"]["nutz"])
+    return {
+        "fillColor": nutz_colors.get(nutz_value, default_color),
+        "color": "black",
+        "weight": 0.3,
+        "fillOpacity": 0.5,
+    }
+
 folium.GeoJson(
-    green_spaces,
-    name="Green Spaces",
-    style_function=lambda x: {
-        "fillColor": "lightgreen",
-        "color": "darkgreen",
-        "weight": 1,
-        "fillOpacity": 0.3,
-    },
-    tooltip=folium.GeoJsonTooltip(fields=["namenr"], aliases=["Name:"])
-).add_to(green_fg)
+    berlin_area,
+    name="Berlin Areas",
+    style_function=style_function,
+    tooltip=folium.GeoJsonTooltip(
+        fields=["bezirk", "enutzung", "ew2023"],
+        aliases=["District:", "Usage:", "Residents 2023:"]
+    )
+).add_to(berlin_area_fg)
 
 # -------------------------------------------------
 # Add layers to map
 # -------------------------------------------------
-fountains_fg.add_to(m)
+# Note: The order matters in terms of "clicking on items"
+# So having the areas first makes everthing "over them"
+# better clickable.
+berlin_area_fg.add_to(m)
 stops_fg.add_to(m)
 stores_fg.add_to(m)
-green_fg.add_to(m)
+fountains_fg.add_to(m)
 
 folium.LayerControl(collapsed=False).add_to(m)
 
