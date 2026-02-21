@@ -30,6 +30,13 @@ print(f"Num von Eintraegen mit Namen: {gruenanlagen_osmnx_df["name"].notna().sum
 print(gruenanlagen_osmnx_df.head())
 
 
+print("\n\nFlächen insgesamt:")
+print("\n\nMerged Data Set von Berlin Open Data:")
+berlin_area_df = gpd.read_file("Flaechennutzung/berlin_area_merged.geojson")
+print(f"Num Flächen im Dataset: {len(berlin_area_df)}")
+print(berlin_area_df.head())
+
+
 print("\n\nHaltestellen:")
 print("\n\nQuelle OSM x Overpass API:")
 haltestellen_osm_overpass_df = pd.read_csv("Haltestellen/Quelle_Openstreetmap/oepnv_01_overpass_result.csv")
