@@ -4,6 +4,7 @@ import pandas as pd
 from shapely import wkt
 import numpy as np
 from scipy.spatial import cKDTree
+from scipy.stats import chi2_contingency
 
 # --------------------------------------------------
 # 1. Change to EPSG:25833 to get distances in meter
@@ -121,3 +122,74 @@ landuse_counts = fountains_with_landuse["enutzung"].value_counts(normalize=True)
 
 print("\nDistribution of Fountains dependend on landuse (%):")
 print(landuse_counts)
+
+
+# --------------------------------------------------
+# 5. CHI-SQUARE TEST: Fountains in green vs. non-green areas
+# --------------------------------------------------
+# Check whether fountains tend to be placed in green spaces:
+
+# Research Question: Are fountains disproportionately located
+# in green areas compared to the overall land-use distribution in Berlin?
+
+# H0 (Null hypothesis):
+# Fountain placement is independent of land-use type.
+
+# H1 (Alternative hypothesis):
+# Fountains are overrepresented in green areas.
+
+# Define green land-use types
+green_types = [
+    "Park / green space",
+    "Allotment garden",
+    "Forest",
+    "Sport use",
+    "Fallow area, mixed vegetation - meadows, trees, bushes",
+    "Cemetery",
+]
+
+# Observed distribution: Land-use of areas where fountains are located
+fountains_with_landuse["is_green"] = fountains_with_landuse["enutzung"].isin(green_types)
+
+observed_green = fountains_with_landuse["is_green"].sum()
+observed_non_green = len(fountains_with_landuse) - observed_green
+
+# Expected distribution: Land-use distribution of all Berlin areas
+berlin_area["is_green"] = berlin_area["enutzung"].isin(green_types)
+expected_green = berlin_area["is_green"].sum()
+expected_non_green = len(berlin_area) - expected_green
+
+contingency_table = [
+    [observed_green, observed_non_green],
+    [expected_green, expected_non_green]
+]
+
+# Is the proportion of fountains in green areas different from
+# the proportion of green areas in Berlin overall?
+chi2, p_value, dof, expected = chi2_contingency(contingency_table)
+
+print("\nChi-Square Test Results")
+print("------------------------")
+print("Observed Green:", observed_green)
+print("Observed Non-Green:", observed_non_green)
+print("Expected Green (overall areas):", expected_green)
+print("Expected Non-Green (overall areas):", expected_non_green)
+print("\nChi2 statistic:", chi2)
+print("p-value:", p_value)
+print("Degrees of freedom:", dof)
+
+# Effect size:
+n = np.sum(contingency_table)
+cramers_v = np.sqrt(chi2 / (n * (min(contingency_table.__len__()-1, 1))))
+
+print("Cramér's V:", cramers_v)
+
+# Proportion:
+# Share of green areas in Berlin: 7573 / (7573 + 18849) = 0.2866
+# Share of fountains in green areas: 53 / (53 + 189) = 0.2190
+
+# Result: Fountains are actually underrepresented in green areas
+# relative to their overall availability.
+# (Even though "Park / green space" alone got approx. 43% of all fountains.)
+
+# This is likely because forest areas and cemeteries etc. tend to go without fountains...
