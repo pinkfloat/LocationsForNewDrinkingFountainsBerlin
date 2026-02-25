@@ -16,7 +16,7 @@ Eventuell weitere hilfreiche Datensätze:
 
 ---
 
-## Quellen:
+## Daten Quellen:
 
 ### Trinkbrunnen (unter HTML Ressource):
 [Trinkbrunnen GeoJSON Datei](https://daten.berlin.de/datensaetze/trinkwasserbrunnen-wfs-47dba2c3)
@@ -47,6 +47,30 @@ Für Getränkeläden und Haltestellen.
 
 ---
 
-## Übersicht Bevölkerung:
-**Quelle**: [Statistik Einwohner](https://www.statistik-berlin-brandenburg.de/a-i-5-hj)  
-**Wichtige Tabelle**: T11 – Einwohner nach Bezirken und Unter-Bezirken, auch nach Alter.
+## Berechnung neuer Brunnen - Quellen für Ansätze:
+
+### Maximal Covering Location Problem (MCLP)
+Idee: Bei begrenztem Budget (z.B. 30 neue Brunnen) maximiere die versorgte Bevölkerung innerhalb eines Radius R.  
+-> Zum Versorgungslücken berechnen und unterversorgte Gebiete identifizieren  
+[Link zu Paper - Church & ReVelle (1974)](https://www.scribd.com/document/986556159/05-Church-ReVelle-1974-The-maximal-covering-location-problem)
+
+### Weighted Linear Combination (WLC)
+Idee: Gewichtung von Distanzen zu Halestellen, Getränkeläden etc. führt zu Location.  
+`Scorei ​= w1​ * Haltestellen-Distanz + w2​ * weitere Trinkbrunnen-Distanz + w3 * Area-Typ + ...`
+
+### Getränke-Versorgung: Kernel Density Estimation (KDE)
+Idee: Versorgungslückenkarte - Flächen wo:
+- Es nur wenige Shops gibt die Getränke anbieten
+- bisher keine Brunnen besitzen
+- Haltestellen beinhalten
+- Und eine hohe Einwohnerdichte haben  
+eignen sich für neue Brunnen.  
+Berechnung: `Nachfrage-KDE − Brunnen & Getränke-KDE`
+
+### Weitere namhafte Ansätze
+-> Talen (1998) – Visualizing Fairness (Gini-Koeffizient der Versorgung)  
+-> Boone et al. (2009) – Environmental Justice  
+-> Jacek Malczewski (1999) – GIS and Multicriteria Decision Analysis
+
+**Wichtige Anmerkung:** Trinkbrunnen sind in Berlin eher ein "nice to have" als  
+eine zwingende Versorgung und ohnehin nur von April bis Oktober freigegeben.
