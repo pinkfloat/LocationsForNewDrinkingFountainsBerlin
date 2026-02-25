@@ -206,24 +206,15 @@ def chi_square_green_test(fountains_gdf, berlin_area_gdf, green_types):
     Performs a Chi-Square test of independence to evaluate whether
     fountains are disproportionately located in specified land-use types.
 
-    Parameters
-    ----------
-    fountains_gdf : GeoDataFrame
-        Point GeoDataFrame of fountain locations (projected CRS).
-    berlin_area_gdf : GeoDataFrame
-        Polygon GeoDataFrame of land-use areas (same CRS).
-    green_types : list of str
-        List of land-use category names to classify as "green".
-
-    Returns
-    -------
-    dict containing:
-        chi2 statistic
-        p-value
-        degrees of freedom
-        Cramér's V
-        contingency table
+    Additionally prints:
+    - Share of fountain areas that are green
+    - Share of all areas that are green
+    - Probability of fountain given green vs non-green
+    - Relative risk
     """
+
+    # Make a copy to avoid modifying original dataframe
+    berlin_area_gdf = berlin_area_gdf.copy()
 
     # --------------------------------------------------
     # 1. Spatial join: determine which areas contain fountains
@@ -298,28 +289,76 @@ def chi_square_green_test(fountains_gdf, berlin_area_gdf, green_types):
                                          len(contingency_table[0])-1))))
 
     # --------------------------------------------------
-    # 6. Print results
+    # 6. Proportions
+    # --------------------------------------------------
+    total_areas = berlin_area_gdf.shape[0]
+    total_fountain_areas = fountain_green + fountain_non_green
+    total_green_areas = fountain_green + no_fountain_green
+
+    share_fountain_green = fountain_green / total_fountain_areas
+    share_green_overall = total_green_areas / total_areas
+
+    # Probability of fountain given green vs non-green
+    prob_fountain_given_green = fountain_green / total_green_areas
+    prob_fountain_given_non_green = (
+        fountain_non_green /
+        (fountain_non_green + no_fountain_non_green)
+    )
+
+    # Relative Risk
+    relative_risk = prob_fountain_given_green / prob_fountain_given_non_green
+
+    # --------------------------------------------------
+    # 7. Print results
     # --------------------------------------------------
     print("\nChi-Square Test Results")
     print("------------------------")
     print("Contingency Table:")
     print(np.array(contingency_table))
+
     print("\nChi2 statistic:", chi2)
     print("p-value:", p_value)
     print("Degrees of freedom:", dof)
     print("Cramér's V:", cramers_v)
+
+    print("\n--- Proportions ---")
+    print("Share of fountain areas that are green:",
+          round(share_fountain_green, 4))
+    print("Share of green areas overall:",
+          round(share_green_overall, 4))
+
+    print("\nProbability of fountain given green:",
+          round(prob_fountain_given_green, 6))
+    print("Probability of fountain given non-green:",
+          round(prob_fountain_given_non_green, 6))
+
+    print("\nRelative Occurence / Risk (green vs non-green):",
+          round(relative_risk, 3))
 
     return {
         "chi2": chi2,
         "p_value": p_value,
         "dof": dof,
         "cramers_v": cramers_v,
+        "relative_risk": relative_risk,
         "contingency_table": contingency_table
     }
-
 
 print("\n\nFirst Test: All green areas (like before)")
 chi_square_green_test(fountains, berlin_area, green_types)
 
+# Result: Although green areas represent only ~29% of all land-use polygons, they contain ~52% of fountain areas.
+# That is a strong descriptive overrepresentation (2.65 times more).
+# The association is statistically significant. (p value in e-6)
+# However, the effect size is small.(Cremer value is 0.03 which is < 0.1, as areas with fountains are undersampled)
+
 print("\n\nSecond Test: Only Parks")
 chi_square_green_test(fountains, berlin_area, ["Park / green space"])
+
+# Result: Parks make up only ~9% of Berlin’s land-use polygons, but they contain 42% of fountain areas.
+# That is a very strong concentration (7.45 times more).
+# Extremely statistically significan (p value in e-29)
+# With Cremer V. ~= 0.07 still considered a "small" effect statistically - but at least stronger than 0.03.
+
+# Final Result: Fountains function as amenity infrastructure rather than general environmental infrastructure.
+# (They are a nice-to-have, but not essential ... and don't work in winter months anyways.)
