@@ -193,3 +193,133 @@ print("Cramér's V:", cramers_v)
 # (Even though "Park / green space" alone got approx. 43% of all fountains.)
 
 # This is likely because forest areas and cemeteries etc. tend to go without fountains...
+
+
+
+# Adjustment:
+# 1. Compare for different green area types
+# 2. Compare fountain vs. non-fountain areas instead of
+#    fountain vs. all berlin areas.
+
+def chi_square_green_test(fountains_gdf, berlin_area_gdf, green_types):
+    """
+    Performs a Chi-Square test of independence to evaluate whether
+    fountains are disproportionately located in specified land-use types.
+
+    Parameters
+    ----------
+    fountains_gdf : GeoDataFrame
+        Point GeoDataFrame of fountain locations (projected CRS).
+    berlin_area_gdf : GeoDataFrame
+        Polygon GeoDataFrame of land-use areas (same CRS).
+    green_types : list of str
+        List of land-use category names to classify as "green".
+
+    Returns
+    -------
+    dict containing:
+        chi2 statistic
+        p-value
+        degrees of freedom
+        Cramér's V
+        contingency table
+    """
+
+    # --------------------------------------------------
+    # 1. Spatial join: determine which areas contain fountains
+    # --------------------------------------------------
+    joined = gpd.sjoin(
+        berlin_area_gdf,
+        fountains_gdf[["geometry"]],
+        how="left",
+        predicate="contains"
+    )
+
+    # Area has fountain if at least one match exists
+    joined["has_fountain"] = ~joined.index_right.isna()
+
+    # If multiple fountains fall into same polygon,
+    # reduce to unique polygons
+    area_status = joined.groupby(joined.index).agg({
+        "has_fountain": "max"
+    })
+
+    # Merge back to original berlin_area
+    berlin_area_gdf = berlin_area_gdf.join(area_status)
+
+    berlin_area_gdf["has_fountain"] = berlin_area_gdf["has_fountain"].fillna(False)
+
+    # Debugging:
+    # print(berlin_area_gdf.head())
+
+    # --------------------------------------------------
+    # 2. Classify green vs non-green
+    # --------------------------------------------------
+    berlin_area_gdf["is_green"] = berlin_area_gdf["enutzung"].isin(green_types)
+
+    # --------------------------------------------------
+    # 3. Build contingency table
+    # --------------------------------------------------
+    fountain_green = berlin_area_gdf[
+        (berlin_area_gdf["has_fountain"]) &
+        (berlin_area_gdf["is_green"])
+    ].shape[0]
+
+    fountain_non_green = berlin_area_gdf[
+        (berlin_area_gdf["has_fountain"]) &
+        (~berlin_area_gdf["is_green"])
+    ].shape[0]
+
+    no_fountain_green = berlin_area_gdf[
+        (~berlin_area_gdf["has_fountain"]) &
+        (berlin_area_gdf["is_green"])
+    ].shape[0]
+
+    no_fountain_non_green = berlin_area_gdf[
+        (~berlin_area_gdf["has_fountain"]) &
+        (~berlin_area_gdf["is_green"])
+    ].shape[0]
+
+    contingency_table = [
+        [fountain_green, fountain_non_green],
+        [no_fountain_green, no_fountain_non_green]
+    ]
+
+    # --------------------------------------------------
+    # 4. Chi-Square Test
+    # --------------------------------------------------
+    chi2, p_value, dof, expected = chi2_contingency(contingency_table)
+
+    # --------------------------------------------------
+    # 5. Effect Size (Cramér's V)
+    # --------------------------------------------------
+    n = np.sum(contingency_table)
+    cramers_v = np.sqrt(chi2 / (n * (min(len(contingency_table)-1, 
+                                         len(contingency_table[0])-1))))
+
+    # --------------------------------------------------
+    # 6. Print results
+    # --------------------------------------------------
+    print("\nChi-Square Test Results")
+    print("------------------------")
+    print("Contingency Table:")
+    print(np.array(contingency_table))
+    print("\nChi2 statistic:", chi2)
+    print("p-value:", p_value)
+    print("Degrees of freedom:", dof)
+    print("Cramér's V:", cramers_v)
+
+    return {
+        "chi2": chi2,
+        "p_value": p_value,
+        "dof": dof,
+        "cramers_v": cramers_v,
+        "contingency_table": contingency_table
+    }
+
+
+print("\n\nFirst Test: All green areas (like before)")
+chi_square_green_test(fountains, berlin_area, green_types)
+
+print("\n\nSecond Test: Only Parks")
+chi_square_green_test(fountains, berlin_area, ["Park / green space"])
