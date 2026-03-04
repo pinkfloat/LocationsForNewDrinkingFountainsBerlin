@@ -6,20 +6,20 @@ gdf = gpd.read_file(filename)
 
 # nutz → nutzung
 nutz_df = (
-    gdf[["nutz", "nutzung"]]
+    gdf[["nutz", "enutzung"]]
     .drop_duplicates()
     .sort_values("nutz")
 )
 
-print("\n=== 'nutz' → 'nutzung' ===")
+print("\n=== 'nutz' → 'enutzung' ===")
 print(nutz_df.to_string(index=False))
 
 # typ → typklar
 typ_df = (
-    gdf[["typ", "typ_klar"]]
+    gdf[["typ", "etypklar"]]
     .drop_duplicates()
     .sort_values("typ")
 )
 
-print("\n=== 'typ' → 'typ_klar' ===")
+print("\n=== 'typ' → 'etypklar' ===")
 print(typ_df.to_string(index=False)) 
