@@ -28,6 +28,9 @@ fountains = fountains.set_crs("EPSG:4326", allow_override=True)
 berlin_area = gpd.read_file("Flaechennutzung/berlin_area_merged.geojson")
 berlin_area = berlin_area.set_crs("EPSG:4326", allow_override=True)
 
+new_fountains = gpd.read_file("new_calculated_fountains.geojson")
+new_fountains = new_fountains.set_crs("EPSG:4326", allow_override=True)
+
 # -------------------------------------------------
 # Map center (Berlin)
 # -------------------------------------------------
@@ -37,6 +40,7 @@ m = folium.Map(location=[52.52, 13.405], zoom_start=12, tiles="CartoDB positron"
 # Feature Groups (Layers)
 # -------------------------------------------------
 fountains_fg = folium.FeatureGroup(name="Drinking Fountains")
+new_fountains_fg = folium.FeatureGroup(name="New Fountains")
 stops_fg = folium.FeatureGroup(name="Public Transport Stops")
 stores_fg = folium.FeatureGroup(name="Beverage Stores")
 berlin_area_fg = folium.FeatureGroup(name="Berlin Areas")
@@ -57,10 +61,7 @@ stores_cluster = MarkerCluster().add_to(stores_fg)
 # Drinking fountains (blue markers)
 # -------------------------------------------------
 for _, row in fountains.iterrows():
-    fountain_id = row.get('id', 'N/A')
-    
-    if fountain_id != 'N/A':
-        fountain_id = fountain_id.replace("trinkwasserbrunnen.", "")
+    fountain_id = row.get('nummer', 'N/A')
 
     folium.CircleMarker(
         location=[row.geometry.y, row.geometry.x],
@@ -70,6 +71,21 @@ for _, row in fountains.iterrows():
         fill_opacity=0.8,
         popup=f"Drinking Fountain No: {fountain_id}"
     ).add_to(fountains_fg)
+
+# -------------------------------------------------
+# New calc. Drinking fountains (purple markers)
+# -------------------------------------------------
+for _, row in new_fountains.iterrows():
+    fountain_id = row.get('nummer')
+
+    folium.CircleMarker(
+        location=[row.geometry.y, row.geometry.x],
+        radius=4,
+        color="purple",
+        fill=True,
+        fill_opacity=0.8,
+        popup=f"New Fountain No: {fountain_id}"
+    ).add_to(new_fountains_fg)
 
 # -------------------------------------------------
 # Public transport stops (yellow, clustered)
@@ -166,6 +182,7 @@ berlin_area_fg.add_to(m)
 stops_fg.add_to(m)
 stores_fg.add_to(m)
 fountains_fg.add_to(m)
+new_fountains_fg.add_to(m)
 
 folium.LayerControl(collapsed=False).add_to(m)
 
