@@ -35,16 +35,17 @@ berlin_area = load_geojson_fix_crs("Flaechennutzung/berlin_area_merged.geojson")
 # ==============================
 
 N_NEW_FOUNTAINS = 50
-MIN_DISTANCE_NEW = 1000  # meters between newly created fountains
-URBAN_RADIUS = 2000  # meters for urban population context
+MIN_DISTANCE_NEW = 2000  # meters between newly created fountains
+URBAN_RADIUS = 3000  # meters for urban population context
 
 weights = {
-    "landuse": 0.15,
-    "population": 0.35,
-    "urban_pop": 0.25,
-    "dist_fountain": 0.30,
+    "landuse": 0.50,
+    "population": 0.10,
+    "urban_pop": 0.40,
+    "dist_fountain": 0.50,
     "dist_store": 0.15,
     "dist_stop": 0.10,
+    "edge": 0.01,
 }
 
 # Land use base suitability scores
@@ -129,6 +130,11 @@ berlin_area["dist_fountain"] = compute_min_distance(berlin_area, fountains)
 berlin_area["dist_store"] = compute_min_distance(berlin_area, stores)
 berlin_area["dist_stop"] = compute_min_distance(berlin_area, stops)
 
+# Distance to city border
+berlin_boundary = berlin_area.unary_union
+berlin_area["dist_edge"] = berlin_area.geometry.apply(
+    lambda g: g.distance(berlin_boundary.boundary)
+)
 
 # ==============================
 # NORMALIZATION
@@ -142,6 +148,9 @@ berlin_area["score_dist_stop"] = inverse_normalize(berlin_area["dist_stop"])
 
 # Urban population context -> Areas with many residents around = also good
 berlin_area["score_urban_pop"] = normalize(berlin_area["urban_pop_raw"])
+
+# Polishing: Penalize putting new fountains at city border
+berlin_area["edge_score"] = normalize(berlin_area["dist_edge"])
 
 
 # ==============================
@@ -173,7 +182,8 @@ berlin_area["final_score"] = (
     weights["urban_pop"] * berlin_area["score_urban_pop"] +
     weights["dist_fountain"] * berlin_area["score_dist_fountain"] +
     weights["dist_store"] * berlin_area["score_dist_store"] +
-    weights["dist_stop"] * berlin_area["score_dist_stop"]
+    weights["dist_stop"] * berlin_area["score_dist_stop"] +
+    weights["edge"] * berlin_area["edge_score"]
 )
 
 
