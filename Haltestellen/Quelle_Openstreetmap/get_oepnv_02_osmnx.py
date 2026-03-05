@@ -1,4 +1,5 @@
 import osmnx as ox
+import pandas as pd
 import geopandas as gpd
 
 # Gebiet definieren
@@ -61,6 +62,11 @@ def generate_type_info(row):
         return None
 
 gdf['type_info'] = gdf.apply(generate_type_info, axis=1)
+
+# Doppelte Haltestellen anhand des Namens entfernen
+named = gdf[gdf["name"].notna()].drop_duplicates(subset="name")
+unnamed = gdf[gdf["name"].isna()]
+gdf = gpd.GeoDataFrame(pd.concat([named, unnamed], ignore_index=True))
 
 # Optional nur relevante Spalten behalten
 gdf = gdf[['id', 'name', 'type_info', 'geometry']]
