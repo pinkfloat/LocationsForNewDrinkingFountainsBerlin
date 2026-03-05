@@ -57,7 +57,18 @@ landuse_scores = {
 }
 
 # Excluded land uses
-excluded_landuse = [110, 90]  # water, construction site
+# nutz                                               enutzung                                                    nutzung
+#  110                                          Body of water                                                   Gewässer
+#  122                                               Farmland                                                  Ackerland
+#  160                                       Allotment garden                                          Kleingartenanlage
+#  200                            Tree nursery / horticulture                                     Baumschule / Gartenbau
+#   40                         Commercial and industrial area  Gewerbe- und Industrienutzung, großflächiger Einzelhandel
+#   60                                           Utility area                                        Ver- und Entsorgung
+#   70           Weekend cottage / allotment-garden-type area             Wochenendhaus- und kleingartenähnliche Nutzung
+#   80                           Traffic area (without roads)                              Verkehrsfläche (ohne Straßen)
+#   90                                      Construction site                                                  Baustelle
+
+excluded_landuse = [110, 122, 160, 200, 40, 60, 70, 80, 90]
 
 
 # ==============================
