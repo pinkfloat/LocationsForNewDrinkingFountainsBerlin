@@ -35,19 +35,19 @@ berlin_area = load_geojson_fix_crs("Flaechennutzung/berlin_area_merged.geojson")
 # ==============================
 
 N_NEW_FOUNTAINS = 50
-MIN_DISTANCE_NEW = 400  # meters between newly created fountains
+MIN_DISTANCE_NEW = 1000  # meters between newly created fountains
 
 weights = {
-    "landuse": 0.30,
-    "population": 0.25,
-    "dist_fountain": 0.25,
-    "dist_store": 0.10,
-    "dist_stop": 0.10,
+    "landuse": 0.20,
+    "population": 0.5,
+    "dist_fountain": 0.30,
+    "dist_store": 0.15,
+    "dist_stop": 0.05,
 }
 
 # Land use base suitability scores
 landuse_scores = {
-    130: 1.0,  # Park / green space
+    130: 0.9,  # Park / green space
     190: 0.9,  # Sport use
     140: 0.8,  # City square
     10: 0.8,   # Housing area
