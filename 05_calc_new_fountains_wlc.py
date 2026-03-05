@@ -36,13 +36,15 @@ berlin_area = load_geojson_fix_crs("Flaechennutzung/berlin_area_merged.geojson")
 
 N_NEW_FOUNTAINS = 50
 MIN_DISTANCE_NEW = 1000  # meters between newly created fountains
+URBAN_RADIUS = 2000  # meters for urban population context
 
 weights = {
-    "landuse": 0.20,
-    "population": 0.5,
+    "landuse": 0.15,
+    "population": 0.35,
+    "urban_pop": 0.25,
     "dist_fountain": 0.30,
     "dist_store": 0.15,
-    "dist_stop": 0.05,
+    "dist_stop": 0.10,
 }
 
 # Land use base suitability scores
@@ -54,6 +56,7 @@ landuse_scores = {
     30: 0.6,   # Core area
     21: 0.6,   # Mixed area
     50: 0.5,   # Public use
+    100: 0.3,  # Forest
 }
 
 # Excluded land uses
@@ -90,6 +93,11 @@ def compute_min_distance(source_gdf, target_gdf):
     )
 
 
+def population_in_radius(point, polygons, radius):
+    buffer = point.buffer(radius)
+    nearby = polygons[polygons.intersects(buffer)]
+    return nearby["ew2023"].sum()
+
 # ==============================
 # PREPARE POLYGONS
 # ==============================
@@ -102,6 +110,15 @@ berlin_area["geometry"] = berlin_area.centroid
 
 # Remove polygons without population
 berlin_area = berlin_area[berlin_area["ew_ha_2023"] > 0].copy()
+
+
+# ==============================
+# URBAN POPULATION CONTEXT
+# ==============================
+
+berlin_area["urban_pop_raw"] = berlin_area.geometry.apply(
+    lambda g: population_in_radius(g, berlin_area, URBAN_RADIUS)
+)
 
 
 # ==============================
@@ -122,6 +139,9 @@ berlin_area["score_population"] = normalize(berlin_area["ew_ha_2023"])
 berlin_area["score_dist_fountain"] = normalize(berlin_area["dist_fountain"])
 berlin_area["score_dist_store"] = normalize(berlin_area["dist_store"])
 berlin_area["score_dist_stop"] = inverse_normalize(berlin_area["dist_stop"])
+
+# Urban population context -> Areas with many residents around = also good
+berlin_area["score_urban_pop"] = normalize(berlin_area["urban_pop_raw"])
 
 
 # ==============================
@@ -150,6 +170,7 @@ berlin_area["score_landuse"] = berlin_area.apply(compute_landuse_score, axis=1)
 berlin_area["final_score"] = (
     weights["landuse"] * berlin_area["score_landuse"] +
     weights["population"] * berlin_area["score_population"] +
+    weights["urban_pop"] * berlin_area["score_urban_pop"] +
     weights["dist_fountain"] * berlin_area["score_dist_fountain"] +
     weights["dist_store"] * berlin_area["score_dist_store"] +
     weights["dist_stop"] * berlin_area["score_dist_stop"]
