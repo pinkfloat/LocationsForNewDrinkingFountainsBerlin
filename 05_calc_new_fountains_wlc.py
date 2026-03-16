@@ -20,7 +20,7 @@ def load_points_csv(path):
     gdf = gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
     return gdf.to_crs(TARGET_CRS)
 
-stops = load_points_csv("Haltestellen/Quelle_Openstreetmap/oepnv_02_osmnx_result.csv")
+stops = load_points_csv("Haltestellen/oepnv_02_osmnx_result.csv")
 stores = load_points_csv("Getraenke_Laeden/stores_02_osmnx_result.csv")
 
 

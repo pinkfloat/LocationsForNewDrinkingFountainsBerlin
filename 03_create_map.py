@@ -12,7 +12,7 @@ import os
 # -------------------------------------------------
 pd.set_option('display.max_columns', None)
 
-stops_df = pd.read_csv("Haltestellen/Quelle_Openstreetmap/oepnv_02_osmnx_result.csv")
+stops_df = pd.read_csv("Haltestellen/oepnv_02_osmnx_result.csv")
 stops_df = stops_df[stops_df["name"].notna()].copy()
 stops_df["geometry"] = stops_df["geometry"].apply(wkt.loads)
 stops = gpd.GeoDataFrame(stops_df, geometry="geometry", crs="EPSG:4326")

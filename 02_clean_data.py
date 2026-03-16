@@ -10,7 +10,7 @@ pd.set_option('display.max_columns', None)
 # -------------------------------------------------
 # Load CSV Data
 # -------------------------------------------------
-stops_df = pd.read_csv("Haltestellen/Quelle_Openstreetmap/oepnv_02_osmnx_result.csv")
+stops_df = pd.read_csv("Haltestellen/oepnv_02_osmnx_result.csv")
 stores_df = pd.read_csv("Getraenke_Laeden/stores_02_osmnx_result.csv")
 
 # Load GeoJSON Data
