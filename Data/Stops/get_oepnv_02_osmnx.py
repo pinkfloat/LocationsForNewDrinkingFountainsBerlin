@@ -1,3 +1,17 @@
+"""
+MIT License
+
+Copyright (c) 2026 Sabrina Otto
+
+This file is part of this project and is licensed under the MIT License.
+See the LICENSE file in the project root for the full license text.
+
+Note on datasets:
+This project uses third-party datasets from the Berlin Open Data portal
+and OpenStreetMap. These datasets are not covered by the MIT License and
+remain subject to their respective licenses.
+"""
+
 import osmnx as ox
 import pandas as pd
 import geopandas as gpd

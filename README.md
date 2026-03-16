@@ -16,23 +16,58 @@
 
 # Data Sources
 
-### Drinking Fountains (available under the HTML resource)
+This project uses several publicly available datasets.  
+The datasets are **not owned by this repository's author** and remain subject to their respective licenses and terms of use.
 
-[Drinking fountains GeoJSON file](https://daten.berlin.de/datensaetze/trinkwasserbrunnen-wfs-47dba2c3)
+## Berlin Open Data
 
-### Land Use 2022 (green spaces, residential areas, etc., under HTML resource)
+The following datasets were obtained from the Berlin Open Data portal:  
+https://daten.berlin.de/datensaetze
 
-[Land use GeoJSON file](https://daten.berlin.de/datensaetze/flachennutzung-umweltatlas-ab-2021-wfs-80589f72)
+### Drinking Fountains
 
-Additionally, **population density for 2023** (no GeoJSON was available for 2022):  
-[Population density GeoJSON file with identical grid tiling](https://daten.berlin.de/datensaetze/einwohnerdichte-2023-umweltatlas-wfs-b4eb74c4)
+Source dataset:  
+https://daten.berlin.de/datensaetze/trinkwasserbrunnen-wfs-47dba2c3
 
-The number of residents should help to **weight areas to determine suitable locations for drinking fountains**.  
-As they were sharing keys, I combined the land use and population dataset into one.
+The dataset provides the locations of public drinking fountains in Berlin.
 
-### OpenStreetMap
+### Land Use
 
-Used to retrieve beverage shops and public transport stops.
+Source dataset:  
+https://daten.berlin.de/datensaetze/flachennutzung-umweltatlas-ab-2021-wfs-80589f72
+
+This dataset contains land use classifications such as green spaces, residential areas, and other urban land categories.  
+The dataset of year 2022 has been used here.
+
+### Population Density
+
+Source dataset:  
+https://daten.berlin.de/datensaetze/einwohnerdichte-2023-umweltatlas-wfs-b4eb74c4
+
+Population density was used to weight areas in order to estimate suitable locations for drinking fountains.   
+The grid tiling is compatible with the land use dataset, so they can be merged.
+
+## OpenStreetMap
+
+Additional geospatial data such as **beverage shops** and **public transport stops** were derived from:
+
+OpenStreetMap  
+https://www.openstreetmap.org
+
+© OpenStreetMap contributors  
+OpenStreetMap data is licensed under the **Open Database License (ODbL)**:  
+https://opendatacommons.org/licenses/odbl/
+
+## License Notice
+
+The **MIT License included in this repository applies only to the source code**.
+
+All datasets remain subject to the licenses of their original providers:
+
+- Berlin Open Data portal datasets  
+- OpenStreetMap data (ODbL)
+
+Users of this repository are responsible for complying with the licenses of the respective data providers.
 
 ---
 
