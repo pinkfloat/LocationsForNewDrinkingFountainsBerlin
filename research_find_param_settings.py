@@ -8,12 +8,21 @@ import torch.optim as optim
 import json
 import itertools
 
+# Idea of this script:
+# Finding the most suitable parameters for the weights for script 02_calc_new_fountains_wlc.py  
+# If we set the weight for "distance to already existing fountains" to zero, so that we allow
+# new fountains to be placed exactly where already existing fountains are, we can try to find
+# a combination of other settings, that would set the 50 new fountains as close as possible to some
+# of the existing 240-something fountains. (So we are looking for a result with the minimum
+# distance to them.) The combination of settings that hits the locations the best will then be stored.
+
 # ==============================
 # GENERAL SETTINGS
 # ==============================
 TARGET_CRS = "EPSG:25833"
 N_NEW_FOUNTAINS = 50
 
+# Grid search
 MIN_DISTANCE_RANGE = [500, 600, 700, 800, 900, 1000]
 URBAN_RADIUS_RANGE = [500, 600, 700, 800, 900, 1000]
 
