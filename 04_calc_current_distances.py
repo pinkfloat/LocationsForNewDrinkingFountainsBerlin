@@ -6,12 +6,14 @@ import numpy as np
 from scipy.spatial import cKDTree
 from scipy.stats import chi2_contingency
 
-# --------------------------------------------------
-# 1. Change to EPSG:25833 to get distances in meter
-# --------------------------------------------------
-
+# ==============================
+# GENERAL SETTINGS
+# ==============================
 TARGET_CRS = "EPSG:25833"
 
+# ==============================
+# LOAD & CLEAN DATASETS
+# ==============================
 def load_points_csv(path):
     df = pd.read_csv(path)
     df = df[df["name"].notna()].copy()
@@ -22,7 +24,6 @@ def load_points_csv(path):
 stops = load_points_csv("Haltestellen/oepnv_02_osmnx_result.csv")
 stores = load_points_csv("Getraenke_Laeden/stores_02_osmnx_result.csv")
 
-
 def load_geojson_fix_crs(path):
     gdf = gpd.read_file(path)
     gdf = gdf.set_crs("EPSG:4326", allow_override=True)
@@ -32,19 +33,7 @@ fountains = load_geojson_fix_crs("Trinkbrunnen/trinkwasserbrunnen_trinkwasserbru
 berlin_area = load_geojson_fix_crs("Flaechennutzung/berlin_area_merged.geojson")
 
 # --------------------------------------------------
-# Test
-# --------------------------------------------------
-# print("CRS stops:", stops.crs)
-# print("CRS stores:", stores.crs)
-# print("CRS fountains:", fountains.crs)
-# print("CRS berlin_area:", berlin_area.crs)
-
-# print("\nExample coordinate (Meter):")
-# print(fountains.geometry.iloc[0])
-
-
-# --------------------------------------------------
-# 2. DISTANCE: FOUNTAINS -> STOPS
+# DISTANCE: FOUNTAINS -> STOPS
 # --------------------------------------------------
 
 def nearest_distance(source_gdf, target_gdf):
@@ -95,7 +84,7 @@ print("Average Distance Fountain -> Store (m):",
 
 
 # --------------------------------------------------
-# 3. DISTANCE: FOUNTAIN -> FOUNTAIN
+# DISTANCE: FOUNTAIN -> FOUNTAIN
 # --------------------------------------------------
 coords = np.array(list(zip(fountains.geometry.x, fountains.geometry.y)))
 tree = cKDTree(coords)
@@ -110,7 +99,7 @@ print("Average Distance Fountain -> Fountain (m):",
 
 
 # --------------------------------------------------
-# 4. FOUNTAINS PER AREA (Usage Type)
+# FOUNTAINS PER AREA (Usage Type)
 # --------------------------------------------------
 fountains_with_landuse = gpd.sjoin(
     fountains,
@@ -125,7 +114,7 @@ print(landuse_counts)
 
 
 # --------------------------------------------------
-# 5. CHI-SQUARE TEST: Fountains in green vs. non-green areas
+# CHI-SQUARE TEST: Fountains in green vs. non-green areas
 # --------------------------------------------------
 # Check whether fountains tend to be placed in green spaces:
 

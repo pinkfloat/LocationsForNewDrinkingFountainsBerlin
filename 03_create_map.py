@@ -6,30 +6,33 @@ from folium.plugins import MarkerCluster
 import webbrowser
 import os
 
-# -------------------------------------------------
-# Copied from clean_data script to transform csv
-# data into geo dataframes
-# -------------------------------------------------
+# ==============================
+# GENERAL SETTINGS
+# ==============================
+TARGET_CRS = "EPSG:4326"
 pd.set_option('display.max_columns', None)
 
-stops_df = pd.read_csv("Haltestellen/oepnv_02_osmnx_result.csv")
-stops_df = stops_df[stops_df["name"].notna()].copy()
-stops_df["geometry"] = stops_df["geometry"].apply(wkt.loads)
-stops = gpd.GeoDataFrame(stops_df, geometry="geometry", crs="EPSG:4326")
+# ==============================
+# LOAD & CLEAN DATASETS
+# ==============================
+def load_points_csv(path):
+    df = pd.read_csv(path)
+    df = df[df["name"].notna()].copy()
+    df["geometry"] = df["geometry"].apply(wkt.loads)
+    gdf = gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
+    return gdf.to_crs(TARGET_CRS)
 
-stores_df = pd.read_csv("Getraenke_Laeden/stores_02_osmnx_result.csv")
-stores_df = stores_df[stores_df["name"].notna()].copy()
-stores_df["geometry"] = stores_df["geometry"].apply(wkt.loads)
-stores = gpd.GeoDataFrame(stores_df, geometry="geometry", crs="EPSG:4326")
+stops = load_points_csv("Haltestellen/oepnv_02_osmnx_result.csv")
+stores = load_points_csv("Getraenke_Laeden/stores_02_osmnx_result.csv")
 
-fountains = gpd.read_file("Trinkbrunnen/trinkwasserbrunnen_trinkwasserbrunnen_WGS84.geojson")
-fountains = fountains.set_crs("EPSG:4326", allow_override=True)
+def load_geojson_fix_crs(path):
+    gdf = gpd.read_file(path)
+    gdf = gdf.set_crs("EPSG:4326", allow_override=True)
+    return gdf.to_crs(TARGET_CRS)
 
-berlin_area = gpd.read_file("Flaechennutzung/berlin_area_merged.geojson")
-berlin_area = berlin_area.set_crs("EPSG:4326", allow_override=True)
-
-new_fountains = gpd.read_file("new_calculated_fountains.geojson")
-new_fountains = new_fountains.set_crs("EPSG:4326", allow_override=True)
+fountains = load_geojson_fix_crs("Trinkbrunnen/trinkwasserbrunnen_trinkwasserbrunnen_WGS84.geojson")
+berlin_area = load_geojson_fix_crs("Flaechennutzung/berlin_area_merged.geojson")
+new_fountains = load_geojson_fix_crs("new_calculated_fountains.geojson")
 
 # -------------------------------------------------
 # Map center (Berlin)

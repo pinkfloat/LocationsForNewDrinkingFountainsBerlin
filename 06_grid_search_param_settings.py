@@ -27,7 +27,7 @@ distance_range = list(range(500, 3001, 500))   # 500 → 3000
 urban_radius_range = list(range(500, 3001, 500))
 
 # ==============================
-# LOAD DATASETS
+# LOAD & CLEAN DATASETS
 # ==============================
 def load_points_csv(path):
     df = pd.read_csv(path)
@@ -38,7 +38,6 @@ def load_points_csv(path):
 
 stops = load_points_csv("Haltestellen/oepnv_02_osmnx_result.csv")
 stores = load_points_csv("Getraenke_Laeden/stores_02_osmnx_result.csv")
-
 
 def load_geojson_fix_crs(path):
     gdf = gpd.read_file(path)
