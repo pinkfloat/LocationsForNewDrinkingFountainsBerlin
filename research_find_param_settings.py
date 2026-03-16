@@ -38,16 +38,16 @@ def load_points_csv(path):
     gdf = gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
     return gdf.to_crs(TARGET_CRS)
 
-stops = load_points_csv("Haltestellen/oepnv_02_osmnx_result.csv")
-stores = load_points_csv("Getraenke_Laeden/stores_02_osmnx_result.csv")
+stops = load_points_csv("Data/Stops/oepnv_02_osmnx_result.csv")
+stores = load_points_csv("Data/Beverage_Stores/stores_02_osmnx_result.csv")
 
 def load_geojson_fix_crs(path):
     gdf = gpd.read_file(path)
     gdf = gdf.set_crs("EPSG:4326", allow_override=True)
     return gdf.to_crs(TARGET_CRS)
 
-fountains = load_geojson_fix_crs("Trinkbrunnen/trinkwasserbrunnen_trinkwasserbrunnen_WGS84.geojson")
-berlin_area = load_geojson_fix_crs("Flaechennutzung/berlin_area_merged.geojson")
+fountains = load_geojson_fix_crs("Data/Drinking_Fountains/trinkwasserbrunnen_WGS84.geojson")
+berlin_area = load_geojson_fix_crs("Data/Land_Use/berlin_area_merged.geojson")
 
 # ==============================
 # CONST. PARAMETERS

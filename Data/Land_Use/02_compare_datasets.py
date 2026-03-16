@@ -8,8 +8,8 @@ row = 12
 # -----------------------------
 # Load data
 # -----------------------------
-usage_df = gpd.read_file("ua_flaechennutzung_c_reale_nutzung_2022_WGS84.geojson")
-population_df = gpd.read_file("ua_einwohnerdichte_2023_einwohnerdichte2023_WGS84.geojson")
+usage_df = gpd.read_file("flaechennutzung2022_WGS84.geojson")
+population_df = gpd.read_file("einwohnerdichte2023_WGS84.geojson")
 
 # Check if index exists
 if row >= len(usage_df):

@@ -1,6 +1,6 @@
 import geopandas as gpd
 
-filename = "ua_flaechennutzung_c_reale_nutzung_2022_WGS84.geojson"
+filename = "flaechennutzung2022_WGS84.geojson"
 
 gdf = gpd.read_file(filename)
 
