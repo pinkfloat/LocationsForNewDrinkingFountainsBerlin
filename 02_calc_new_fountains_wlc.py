@@ -1,9 +1,6 @@
 import geopandas as gpd
 import pandas as pd
 from shapely import wkt
-import numpy as np
-from shapely.geometry import Point
-from shapely.ops import nearest_points
 
 # ==============================
 # GENERAL SETTINGS

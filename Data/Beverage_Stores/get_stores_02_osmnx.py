@@ -1,5 +1,4 @@
 import osmnx as ox
-import geopandas as gpd
 
 place_name = "Berlin, Germany"
 
