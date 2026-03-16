@@ -1,76 +1,79 @@
 # UrbanTech Drinking Fountains
-## Fragestellung: Wo sollten neue Trinkbrunnen aufgestellt werden?
 
-- Anhand von bisherigen Brunnenstandorten
-- Grünanlagen
-- ÖPNV-Daten
-- Kaufläden (die Getränke bereitstellen)
-- Bevölkerungsdichte
+## Research Question: Where should new drinking fountains be installed in Berlin?
 
-Eventuell weitere hilfreiche Datensätze:  
-[Fußwege in Berlin](https://daten.berlin.de/datensaetze/fussgangernetz-wfs-f1995e5e)  
-[Straßennetz](https://daten.berlin.de/datensaetze/detailnetz-berlin-wfs-4f2045ef)
+* Based on existing drinking fountain locations
+* Types of land use (e.g., green spaces)
+* Population distribution
+* Public transport data
+* Retail stores (that provide beverages)
 
-## Trinkbrunnen und Grünanlagen direkt auf Geoportal Berlin Karte:
-[Trinkbrunnen und Grünanlagen zusammen](<https://gdi.berlin.de/viewer/main/?LAYERS=[{%22id%22:%22hintergrund_default_grau%22},{%22id%22:%22gruenanlagen:spielplaetze%22},{%22id%22:%22gruenanlagen:gruenanlagen%22},{%22id%22:%22trinkwasserbrunnen:trinkwasserbrunnen%22}]>)
+## Existing Drinking Fountains and Green Spaces directly on the Geoportal Berlin map:
+
+[Drinking fountains and green spaces together](https://gdi.berlin.de/viewer/main/?LAYERS=[{%22id%22:%22hintergrund_default_grau%22},{%22id%22:%22gruenanlagen:spielplaetze%22},{%22id%22:%22gruenanlagen:gruenanlagen%22},{%22id%22:%22trinkwasserbrunnen:trinkwasserbrunnen%22}])
 
 ---
 
-## Daten Quellen:
+# Data Sources
 
-### Trinkbrunnen (unter HTML Ressource):
-[Trinkbrunnen GeoJSON Datei](https://daten.berlin.de/datensaetze/trinkwasserbrunnen-wfs-47dba2c3)
+### Drinking Fountains (available under the HTML resource)
 
-### Flächennutzung 2022 (Grünanlagen, Wohngebiete, etc., unter HTML Ressource)
-[Flächennutzung GeoJSON Datei](https://daten.berlin.de/datensaetze/flachennutzung-umweltatlas-ab-2021-wfs-80589f72)
+[Drinking fountains GeoJSON file](https://daten.berlin.de/datensaetze/trinkwasserbrunnen-wfs-47dba2c3)
 
-Dazu passend Einwohnerdichte 2023 (zu 2022 gab's kein geojson):  
-[Einwohnerdichte in identischer Kachelung](https://daten.berlin.de/datensaetze/einwohnerdichte-2023-umweltatlas-wfs-b4eb74c4)  
-Die Anzahl der Einwohner sollte helfen Gebiete für Trinkbrunnen zu Gewichten.
+### Land Use 2022 (green spaces, residential areas, etc., under HTML resource)
 
-### Grünanlagen (WFS Datei - deprecated wenn Flächennutzung verwendet wird):
-[Grünanlagen WFS Datei](https://daten.berlin.de/datensaetze/grunanlagenbestand-berlin-einschliesslich-der-offentlichen-spielplatze-wfs-737fd0a4)
+[Land use GeoJSON file](https://daten.berlin.de/datensaetze/flachennutzung-umweltatlas-ab-2021-wfs-80589f72)
 
-**Achtung unvollständig!!**
-- Z.Bsp.: "Friedhof Baumschulenweg" nicht als Grünanlage markiert.
-- Extraktionen aus Open Street Map haben aber bisher deutlich schlechtere Qualität.
-  - Code manuell nachbessern könnte helfen, um evtl. weitere Grünflächen hinzuzufügen.
-  - Alle Ergebnisse haben ansonsten ähnlich viele Zeilen (ca. 2500-2700) – also ähnliche Datenmenge.
-  - [OpenStreetMap Park Beispiel](https://www.openstreetmap.org/way/4413796#map=17/52.492887/13.310092)
+Additionally, **population density for 2023** (no GeoJSON was available for 2022):  
+[Population density GeoJSON file with identical grid tiling](https://daten.berlin.de/datensaetze/einwohnerdichte-2023-umweltatlas-wfs-b4eb74c4)
 
-**Weitere Erweiterungsmöglichkeiten**
-- **Wälder**: [Grunewald auf OpenStreetMap](https://www.openstreetmap.org/relation/3410#map=13/52.46898/13.25672)
-- **Friedhöfe**: Hier ließen sich eventuell auch weitere Datensätze auf der Berlin Website finden.
+The number of residents should help to **weight areas to determine suitable locations for drinking fountains**.  
+As they were sharing keys, I combined the land use and population dataset into one.
 
-### Openstreetmap
-Für Getränkeläden und Haltestellen.
+### OpenStreetMap
+
+Used to retrieve beverage shops and public transport stops.
 
 ---
 
-## Berechnung neuer Brunnen - Quellen für Ansätze:
-
-### Maximal Covering Location Problem (MCLP)
-Idee: Bei begrenztem Budget (z.B. 30 neue Brunnen) maximiere die versorgte Bevölkerung innerhalb eines Radius R.  
--> Zum Versorgungslücken berechnen und unterversorgte Gebiete identifizieren  
-[Link zu Paper - Church & ReVelle (1974)](https://www.scribd.com/document/986556159/05-Church-ReVelle-1974-The-maximal-covering-location-problem)
+# Calculating New Fountain Locations – Methodological Sources
 
 ### Weighted Linear Combination (WLC)
-Idee: Gewichtung von Distanzen zu Halestellen, Getränkeläden etc. führt zu Location.  
-`Scorei ​= w1​ * Haltestellen-Distanz + w2​ * weitere Trinkbrunnen-Distanz + w3 * Area-Typ + ...`
 
-### Getränke-Versorgung: Kernel Density Estimation (KDE)
-Idee: Versorgungslückenkarte - Flächen wo:
-- Es nur wenige Shops gibt die Getränke anbieten
-- bisher keine Brunnen besitzen
-- Haltestellen beinhalten
-- Und eine hohe Einwohnerdichte haben  
-eignen sich für neue Brunnen.  
-Berechnung: `Nachfrage-KDE − Brunnen & Getränke-KDE`
+Idea: Weighting distances to public transport stops, beverage stores, etc. leads to a suitability score for each location.
 
-### Weitere namhafte Ansätze
--> Talen (1998) – Visualizing Fairness (Gini-Koeffizient der Versorgung)  
--> Boone et al. (2009) – Environmental Justice  
--> Jacek Malczewski (1999) – GIS and Multicriteria Decision Analysis
+`Score_i = w1 * distance_to_stop + w2 * distance_to_other_fountains + w3 * area_type + ...`
 
-**Wichtige Anmerkung:** Trinkbrunnen sind in Berlin eher ein "nice to have" als  
-eine zwingende Versorgung und ohnehin nur von April bis Oktober freigegeben.
+This is also the **method implemented in this project**.
+
+### Maximal Covering Location Problem (MCLP)
+
+Idea: With a limited budget (e.g., **50 new fountains**), maximize the population served within a radius **R**.
+
+→ Useful for identifying coverage gaps and underserved areas.
+
+[Link to paper – Church & ReVelle (1974)](https://www.scribd.com/document/986556159/05-Church-ReVelle-1974-The-maximal-covering-location-problem)
+
+### Beverage Supply: Kernel Density Estimation (KDE)
+
+Idea: Create a **supply gap map**. Areas that:
+
+* Have only a few shops offering beverages
+* Do not yet contain drinking fountains
+* Include public transport stops
+* And have a high population density
+
+are good candidates for new fountains.
+
+Calculation:
+`Demand KDE − fountain & beverage KDE`
+
+### Other notable approaches
+
+→ Talen (1998) – *Visualizing Fairness* (Gini coefficient of service distribution)  
+→ Boone et al. (2009) – *Environmental Justice*  
+→ Jacek Malczewski (1999) – *GIS and Multicriteria Decision Analysis*
+
+---
+
+**Important note:** In Berlin, drinking fountains are generally considered more of a **“nice-to-have” amenity** rather than an essential service, and they are **only operational from April to October**.
